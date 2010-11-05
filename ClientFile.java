@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import javax.net.ssl.*;
 
 public class ClientFile {
 	
@@ -12,12 +13,13 @@ public class ClientFile {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		File file = new File("C:\\Daniel\\Work\\VT Grad\\CS6204\\test.txt");
+		File file = new File("./Client.java");
 		long length = file.length();
 		
 		BufferedInputStream inFile = new BufferedInputStream(new FileInputStream(file));
-		
-		Socket clientSocket = new Socket("192.168.1.138", 6789);
+		SSLSocketFactory factory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+		SSLSocket clientSocket = (SSLSocket)factory.createSocket("198.82.184.26", 6789);
+//			Socket clientSocket = new Socket("192.168.1.138", 6789);
 		
 		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 		

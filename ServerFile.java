@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import javax.net.ssl.*;
 
 public class ServerFile {
 
@@ -7,12 +8,15 @@ public class ServerFile {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		FileOutputStream output = new FileOutputStream("C:\\Daniel\\Work\\VT Grad\\CS6204\\output.txt");
+		FileOutputStream output = new FileOutputStream("./output.txt");
 		
-		ServerSocket welcomeSocket = new ServerSocket(6789);
+		SSLServerSocketFactory factory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
+		SSLServerSocket welcomeSocket = (SSLServerSocket)factory.createServerSocket(6789);
+//		ServerSocket welcomeSocket = new ServerSocket(6789);
 		
 		while(true) {
-			Socket connectionSocket = welcomeSocket.accept();
+			SSLSocket connectionSocket = (SSLSocket)welcomeSocket.accept();
+//			Socket connectionSocket = welcomeSocket.accept();
 			
 			DataInputStream inFromClient = new DataInputStream(connectionSocket.getInputStream());
 			
