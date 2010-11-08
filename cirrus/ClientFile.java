@@ -13,12 +13,12 @@ public class ClientFile {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		File file = new File("./Client.java");
+		File file = new File("../cirrus/Client.java");
 		long length = file.length();
 		
 		BufferedInputStream inFile = new BufferedInputStream(new FileInputStream(file));
 		SSLSocketFactory factory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-		SSLSocket clientSocket = (SSLSocket)factory.createSocket("198.82.184.26", 6789);
+		SSLSocket clientSocket = (SSLSocket)factory.createSocket("localhost", 6789);
 //			Socket clientSocket = new Socket("192.168.1.138", 6789);
 		
 		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
