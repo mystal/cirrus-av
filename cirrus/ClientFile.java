@@ -10,6 +10,7 @@ public class ClientFile {
 	}
 
 	/**
+	 * Usage: ClientFile [-h hostIpAddress] file1 file2 file3...
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
