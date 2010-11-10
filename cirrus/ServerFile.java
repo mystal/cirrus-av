@@ -8,7 +8,7 @@ public class ServerFile {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		FileOutputStream output = new FileOutputStream("./output.txt");
+		
 		
 		SSLServerSocketFactory factory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 		SSLServerSocket welcomeSocket = (SSLServerSocket)factory.createServerSocket(6789);
@@ -22,22 +22,30 @@ public class ServerFile {
 			
 			DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
 			
-			long length = inFromClient.readLong();
-			
-			byte[] buffer = new byte[65536];
-			int read = 0;
-			int offset = 0;
-			
-			while (offset < length) {
-				read = inFromClient.read(buffer, 0, 65536);
-				output.write(buffer, 0, read);
+			int numFilesToReceive = inFromClient.readInt();
+			for (int i = 0; i < numFilesToReceive; i++) {
+				String name = inFromClient.readLine();
+				FileOutputStream output = new FileOutputStream("./" + name);
 				
-				offset += read;
+				long length = inFromClient.readLong();
+				
+				byte[] buffer = new byte[65536];
+				int read = 0;
+				int offset = 0;
+				
+				while (offset < length) {
+					read = inFromClient.read(buffer, 0, 65536);
+					output.write(buffer, 0, read);
+					
+					offset += read;
+				}
+				output.close();
+				
+				outToClient.writeBytes("Read " + offset + " bytes.\n");
 			}
 			
-			outToClient.writeBytes("Read " + offset + " bytes.\n");
+			outToClient.writeBytes("Read " + numFilesToReceive + " files.\n");
 			
-			output.close();
 		}
 	}
 

@@ -13,35 +13,61 @@ public class ClientFile {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		File file = new File("../cirrus/Client.java");
-		long length = file.length();
+		//Parse args
+		File[] file = new File[args.length];
+		int numFilesToSend = 0;
+		String host = "localhost";
 		
-		BufferedInputStream inFile = new BufferedInputStream(new FileInputStream(file));
-		SSLSocketFactory factory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-		SSLSocket clientSocket = (SSLSocket)factory.createSocket("localhost", 6789);
-//			Socket clientSocket = new Socket("192.168.1.138", 6789);
-		
-		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-		
-		outToServer.writeLong(length);
-		
-		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-		
-		byte[] buffer = new byte[65536];
-		int offset = 0;
-		int read = 0;
-		
-		while(offset < length) {
-			read = inFile.read(buffer, 0, 65536);
-			outToServer.write(buffer, 0, read);
-			
-			offset += read;
+		for (int i = 0; i < args.length; i++) {
+			if ((args[i].equals("-h") || args[i].equals("-H")) && i + 1 < args.length) {
+				host = args[i+1];
+				i++;
+			} else {
+				file[numFilesToSend] = new File(args[i]);
+				numFilesToSend++;
+			}
 		}
 		
-		String transmission = inFromServer.readLine();
+		if (numFilesToSend <= 0) {
+			file = new File[1];
+			file[0] = new File("../cirrus/Client.java");
+			numFilesToSend = 1;
+		}
 		
-		System.out.println("FROM SERVER: " + transmission);
+		SSLSocketFactory factory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+		SSLSocket clientSocket = (SSLSocket)factory.createSocket(host, 6789);
+//			Socket clientSocket = new Socket("192.168.1.138", 6789);
 		
+		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+		
+		byte[] buffer = new byte[65536];
+		int offset;
+		int read;
+		
+		outToServer.writeInt(numFilesToSend);
+		for (int i = 0; i < numFilesToSend; i++) {
+			long length = file[i].length();
+			
+			BufferedInputStream inFile = new BufferedInputStream(new FileInputStream(file[i]));
+			
+			outToServer.writeBytes(file[i].getName() + "\n");
+			outToServer.writeLong(length);
+			
+			offset = 0;
+			read = 0;
+			
+			while(offset < length) {
+				read = inFile.read(buffer, 0, 65536);
+				outToServer.write(buffer, 0, read);
+				
+				offset += read;
+			}
+			
+			String transmission = inFromServer.readLine();
+			
+			System.out.println("FROM SERVER: " + transmission);
+		}		
 		clientSocket.close();
 	}
 
