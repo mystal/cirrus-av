@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CWD=`pwd`
+CWD=`dirname ${0}`
 
 KEYSTORE=${CWD}/foobar
 KEYPASS=foobar

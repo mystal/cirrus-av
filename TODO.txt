@@ -1,0 +1,3 @@
+-Get client and server talking
+-Upload files to be scanned
+-Return whether or not the file is infected

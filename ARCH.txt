@@ -1,0 +1,7 @@
+CirrusAV Architecture
+-
+
+Supported Use Cases
+-Request to scan a local file
+-Request to scan portions of the system
+-Request to scan a file on the Internet and provide a clean download

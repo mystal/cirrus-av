@@ -8,8 +8,6 @@ public class ServerFile {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		
-		
 		SSLServerSocketFactory factory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 		SSLServerSocket welcomeSocket = (SSLServerSocket)factory.createServerSocket(6789);
 		
@@ -24,6 +22,7 @@ public class ServerFile {
 			for (int i = 0; i < numFilesToReceive; i++) {
 				BufferedReader line = new BufferedReader(new InputStreamReader(inFromClient));
 				String name = line.readLine();
+
 				FileOutputStream output = new FileOutputStream("./" + name);
 				
 				long length = inFromClient.readLong();
