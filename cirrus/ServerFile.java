@@ -50,7 +50,7 @@ public class ServerFile {
                 outToClient.writeBytes(f.flag(name) + "\n");
 			}
 			
-			outToClient.writeBytes("Read " + numFilesToReceive + " files.\n");
+			//outToClient.writeBytes("Read " + numFilesToReceive + " files.\n");
 			
 		}
 	}
