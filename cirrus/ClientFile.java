@@ -3,11 +3,6 @@ import java.net.*;
 import javax.net.ssl.*;
 
 public class ClientFile {
-	
-	public static BufferedInputStream readFile(String path) throws Exception {
-		
-		return new BufferedInputStream(new FileInputStream(new File(path)));
-	}
 
 	/**
 	 * Usage: ClientFile [-h hostIpAddress] file1 file2 file3...
@@ -37,7 +32,6 @@ public class ClientFile {
 		
 		SSLSocketFactory factory = (SSLSocketFactory)SSLSocketFactory.getDefault();
 		SSLSocket clientSocket = (SSLSocket)factory.createSocket(host, 6789);
-//			Socket clientSocket = new Socket("192.168.1.138", 6789);
 		
 		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());

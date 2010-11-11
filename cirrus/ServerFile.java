@@ -12,11 +12,9 @@ public class ServerFile {
 		
 		SSLServerSocketFactory factory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 		SSLServerSocket welcomeSocket = (SSLServerSocket)factory.createServerSocket(6789);
-//		ServerSocket welcomeSocket = new ServerSocket(6789);
 		
 		while(true) {
 			SSLSocket connectionSocket = (SSLSocket)welcomeSocket.accept();
-//			Socket connectionSocket = welcomeSocket.accept();
 			
 			DataInputStream inFromClient = new DataInputStream(connectionSocket.getInputStream());
 			
@@ -24,7 +22,8 @@ public class ServerFile {
 			
 			int numFilesToReceive = inFromClient.readInt();
 			for (int i = 0; i < numFilesToReceive; i++) {
-				String name = inFromClient.readLine();
+				BufferedReader line = new BufferedReader(new InputStreamReader(inFromClient));
+				String name = line.readLine();
 				FileOutputStream output = new FileOutputStream("./" + name);
 				
 				long length = inFromClient.readLong();
