@@ -1,6 +1,10 @@
+package cirrus;
+
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
+
+import cirrus.Flagger;
 
 public class ServerFile {
 
@@ -8,6 +12,8 @@ public class ServerFile {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
+        Flagger f = new Flagger();
+
 		SSLServerSocketFactory factory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 		SSLServerSocket welcomeSocket = (SSLServerSocket)factory.createServerSocket(6789);
 		
@@ -40,6 +46,8 @@ public class ServerFile {
 				output.close();
 				
 				outToClient.writeBytes("Read " + offset + " bytes.\n");
+
+                outToClient.writeBytes(f.flag(name) + "\n");
 			}
 			
 			outToClient.writeBytes("Read " + numFilesToReceive + " files.\n");

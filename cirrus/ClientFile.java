@@ -1,3 +1,5 @@
+package cirrus;
+
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
@@ -60,8 +62,10 @@ public class ClientFile {
 			}
 			
 			String transmission = inFromServer.readLine();
+            String flag = inFromServer.readLine();
 			
 			System.out.println("FROM SERVER: " + transmission);
+            System.out.println("Virus? " + flag);
 		}		
 		clientSocket.close();
 	}

@@ -1,3 +1,5 @@
+package cirrus;
+
 import java.util.Random;
 
 public class Flagger
