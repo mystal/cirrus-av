@@ -1,3 +1,13 @@
--Get client and server talking
--Upload files to be scanned
--Return whether or not the file is infected
+-Get client and server talking (done)
+-Upload files to be scanned (done)
+-Return whether or not the file is infected (done)
+-command line arguments (done)
+	-fancy arguments
+-Flagger
+	-run flagger from server (done)
+	-client acts on reports from server
+	-Clam-AV instead
+-Monitor Folders
+-GUI
+-Distributed System
+-scan email?
