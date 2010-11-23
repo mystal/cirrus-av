@@ -1,10 +1,11 @@
 package cirrus.server;
 
+import cirrus.server.AntiVirus;
+import cirrus.server.Flagger;
+
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
-
-import cirrus.server.Flagger;
 
 public class Server {
 
@@ -12,7 +13,10 @@ public class Server {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-        Flagger f = new Flagger();
+        //TODO process arguments
+        //TODO create new Server class instance, which will create listeners...
+
+        AntiVirus f = new Flagger();
 
 		SSLServerSocketFactory factory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 		SSLServerSocket welcomeSocket = (SSLServerSocket)factory.createServerSocket(6789);
@@ -47,7 +51,7 @@ public class Server {
 				
 				outToClient.writeBytes("Read " + offset + " bytes.\n");
 
-                outToClient.writeBytes(f.flag(name) + "\n");
+                outToClient.writeBytes(f.scan(name) + "\n");
 			}
 			
 			//outToClient.writeBytes("Read " + numFilesToReceive + " files.\n");

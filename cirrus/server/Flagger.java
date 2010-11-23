@@ -1,8 +1,10 @@
 package cirrus.server;
 
+import cirrus.server.AntiVirus;
+
 import java.util.Random;
 
-public class Flagger
+public class Flagger implements AntiVirus
 {
     private Random rand;
 
@@ -11,7 +13,7 @@ public class Flagger
         rand = new Random();
     }
 
-    public boolean flag(String filename)
+    public boolean scan(String filename)
     {
         return rand.nextDouble() < 0.5;
     }

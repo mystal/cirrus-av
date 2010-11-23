@@ -6,7 +6,7 @@ BUILDDIR := build
 SERVER := $(SRCDIR)/server/Server.java
 CLIENT := $(SRCDIR)/client/Client.java
 
-.PHONY: all
+.PHONY: all clean server client
 
 all: server client
 

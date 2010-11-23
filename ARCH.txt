@@ -11,15 +11,35 @@ Supported Use Cases
 
 Communication
 -Need to think up a protocol to use. Serialized classes like in SPOOFS? Or a RESTful API? Hmm.
+-Types of communication:
+request scan of file(s)
+request scan of url
+send scan results for file
+send OK to send files
 
 Flagging Program
 -AntiVirus interface class
+-Different types of AntiVirus programs implement it
+-API:
+boolean scan(String filename)
 
 Server
 -Waits for a request to have a file scanned. On receiving a request (which includes number of files to be scanned), sends OK, then waits for the files to be sent. As each file is received, start up a small scanning job in background? Maybe process several files at once? Not too sure yet.
--Needs to send back either a status for the file. Client will take care of what to do afterwards.
+-Needs to send back some information/status of file scan results of a file. Client can then take care of what to do afterwards.
+-Has a handler for listening to a port for communication from client?
 
 Client
 -Need to request a scan of a file or files, on receiving OK, send files in chunks.
 -Waits to get info on the status of files. Will this mean keeping track of which files are being scanned??
 -A daemon that can have multiple clients (command line or GUI)?
+
+Class Hierarchy:
+cirrus
+    common
+    client
+        Client.java
+    server
+        Server.java
+        Flagger.java
+        AntiVirus.java
+--
