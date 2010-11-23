@@ -1,7 +1,25 @@
 CirrusAV Architecture
--
+-Client/Server architecture
+-Server runs the anti-virus software
+-Client responsible for uploading files
 
 Supported Use Cases
 -Request to scan a local file
 -Request to scan portions of the system
 -Request to scan a file on the Internet and provide a clean download
+-Request to scan a new file in a watched directory
+
+Communication
+-Need to think up a protocol to use. Serialized classes like in SPOOFS? Or a RESTful API? Hmm.
+
+Flagging Program
+-AntiVirus interface class
+
+Server
+-Waits for a request to have a file scanned. On receiving a request (which includes number of files to be scanned), sends OK, then waits for the files to be sent. As each file is received, start up a small scanning job in background? Maybe process several files at once? Not too sure yet.
+-Needs to send back either a status for the file. Client will take care of what to do afterwards.
+
+Client
+-Need to request a scan of a file or files, on receiving OK, send files in chunks.
+-Waits to get info on the status of files. Will this mean keeping track of which files are being scanned??
+-A daemon that can have multiple clients (command line or GUI)?

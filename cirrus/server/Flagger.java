@@ -1,4 +1,4 @@
-package cirrus;
+package cirrus.server;
 
 import java.util.Random;
 

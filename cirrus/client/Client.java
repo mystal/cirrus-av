@@ -1,13 +1,13 @@
-package cirrus;
+package cirrus.client;
 
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 
-public class ClientFile {
+public class Client {
 
 	/**
-	 * Usage: ClientFile [-h hostIpAddress] file1 file2 file3...
+	 * Usage: Client [-h hostIpAddress] file1 file2 file3...
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {

@@ -1,12 +1,12 @@
-package cirrus;
+package cirrus.server;
 
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 
-import cirrus.Flagger;
+import cirrus.server.Flagger;
 
-public class ServerFile {
+public class Server {
 
 	/**
 	 * @param args

@@ -6,4 +6,4 @@ KEYSTORE=${CWD}/foobar
 KEYPASS=foobar
 
 cd build
-exec java -Djavax.net.ssl.trustStore=${KEYSTORE} -Djavax.net.ssl.trustStorePassword=${KEYPASS} cirrus.ClientFile $@
+exec java -Djavax.net.ssl.trustStore=${KEYSTORE} -Djavax.net.ssl.trustStorePassword=${KEYPASS} cirrus.client.Client $@
