@@ -28,7 +28,7 @@ public class Client {
 		
 		if (numFilesToSend <= 0) {
 			file = new File[1];
-			file[0] = new File("../cirrus/Client.java");
+			file[0] = new File("../cirrus/client/Client.java");
 			numFilesToSend = 1;
 		}
 		
