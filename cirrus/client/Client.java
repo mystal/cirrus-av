@@ -41,6 +41,7 @@ public class Client {
 				host = args[i+1];
 				i++;
 			} else if ((args[i].equals("-u") || args[i].equals("-U")) && i + 1 < args.length) {
+				URL test = new URL(args[i+1]);
 				urls.add(args[i+1]);
 				i++;
 			} else if ((args[i].equals("-d") || args[i].equals("-D")) && i + 1 < args.length) {
@@ -84,6 +85,7 @@ public class Client {
 		outToServer.writeInt(files.size() + urls.size());
 		//Send files
 		for (int i = 0; i < files.size(); i++) {
+			System.out.println("Sending file: " + files.get(i).getName());
 			long length = files.get(i).length();
 			
 			BufferedInputStream inFile = new BufferedInputStream(new FileInputStream(files.get(i)));
@@ -109,6 +111,7 @@ public class Client {
 		
 		//Send urls
 		for (int i = 0; i < urls.size(); i++) {
+			System.out.println("Sending URL: " + urls.get(i));
 			outToServer.writeBytes(Constants.URL + "\n");
 			outToServer.writeBytes(urls.get(i) + "\n");
             String flag = inFromServer.readLine();
