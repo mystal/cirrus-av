@@ -102,16 +102,20 @@ public class Server {
 
 				//Get File / URL File
 				if (type.equalsIgnoreCase(Constants.FILE)) {
+					System.out.println("Receiving File: " + name);
 					downloadFile(name, inFromClient);
 					outToClient.writeBytes(f.scan(name) + "\n");
 				} else if (type.equalsIgnoreCase(Constants.URL)) {
+					System.out.println("Receiving URL to check: " + name);
 					name = downloadURL(name);
 					boolean infected = f.scan(name);
 					outToClient.writeBytes(infected + "\n");
 					
 					//Send uninfected files to Client
-					if (!infected)
+					if (!infected) {
 						uploadToClient(name, outToClient);
+						System.out.println("Sending URL to client.");
+					}
 				}
 			}
 		}
