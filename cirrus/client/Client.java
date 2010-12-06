@@ -1,6 +1,6 @@
 package cirrus.client;
 
-import cirrus.Constants;
+import cirrus.common.Constants;
 
 import java.util.ArrayList;
 import java.io.*;

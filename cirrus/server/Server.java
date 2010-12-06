@@ -1,8 +1,9 @@
 package cirrus.server;
 
+import cirrus.common.Constants;
 import cirrus.server.AntiVirus;
+import cirrus.server.ClamAV;
 import cirrus.server.Flagger;
-import cirrus.Constants;
 
 import java.io.*;
 import java.net.*;
@@ -80,7 +81,19 @@ public class Server {
         //TODO process arguments
         //TODO create new Server class instance, which will create listeners...
 
-        AntiVirus f = new Flagger();
+        boolean clamAV = false;
+
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("--av")) {
+                clamAV = true;
+			}
+        }
+
+        AntiVirus av;
+        if (clamAV)
+            av = new ClamAV();
+        else
+            av = new Flagger();
 
 		SSLServerSocketFactory factory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
 		SSLServerSocket welcomeSocket = (SSLServerSocket)factory.createServerSocket(6789);
@@ -104,11 +117,11 @@ public class Server {
 				if (type.equalsIgnoreCase(Constants.FILE)) {
 					System.out.println("Receiving File: " + name);
 					downloadFile(name, inFromClient);
-					outToClient.writeBytes(f.scan(name) + "\n");
+					outToClient.writeBytes(av.scan(name) + "\n");
 				} else if (type.equalsIgnoreCase(Constants.URL)) {
 					System.out.println("Receiving URL to check: " + name);
 					name = downloadURL(name);
-					boolean infected = f.scan(name);
+					boolean infected = av.scan(name);
 					outToClient.writeBytes(infected + "\n");
 					
 					//Send uninfected files to Client

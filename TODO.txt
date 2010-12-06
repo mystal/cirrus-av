@@ -7,7 +7,13 @@
 	-run flagger from server (done)
 	-client acts on reports from server
 	-Clam-AV instead
+        -Run using Java Runtime.exec (done)
+        -Get output from program (done)
+        -Parse output to find if infected or not
 -Monitor Folders
 -GUI
 -Distributed System
 -scan email?
+-Evaluate our system
+    -Use AWS monitoring services to see server load?
+    -Client-side load monitoring

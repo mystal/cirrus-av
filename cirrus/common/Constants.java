@@ -1,4 +1,4 @@
-package cirrus;
+package cirrus.common;
 
 public class Constants {
 	public static final String FILE = "file";
