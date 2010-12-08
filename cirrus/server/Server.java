@@ -116,7 +116,7 @@ public class Server {
 				//Get File / URL File
 				if (type.equalsIgnoreCase(Constants.FILE)) {
 					System.out.println("Receiving File: " + name);
-					downloadFile(name, inFromClient);
+					name = downloadFile(name, inFromClient);
 					outToClient.writeBytes(av.scan(name) + "\n");
 				} else if (type.equalsIgnoreCase(Constants.URL)) {
 					System.out.println("Receiving URL to check: " + name);

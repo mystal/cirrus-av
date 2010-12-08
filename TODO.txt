@@ -9,7 +9,7 @@
 	-Clam-AV instead
         -Run using Java Runtime.exec (done)
         -Get output from program (done)
-        -Parse output to find if infected or not
+        -Parse output to find if infected or not (done)
 -Monitor Folders
 -GUI
 -Distributed System
