@@ -21,6 +21,41 @@ public class Client {
 			}
 		}
 	}
+	
+	public static void downloadUrlFromServer(DataInputStream downloadStream, BufferedReader inFromServer, 
+			byte[] buffer, ArrayList<Time> io, ArrayList<Time> comm) throws Exception {
+		
+		long commStart;
+		long commEnd;
+		long ioStart;
+		long ioEnd;
+	    
+	    commStart = System.currentTimeMillis();
+      	String fileName = inFromServer.readLine();
+       	long length = downloadStream.readLong();
+   		commEnd = System.currentTimeMillis();
+     		
+   		comm.add(new Time(commStart, commEnd));
+           	
+    	FileOutputStream output = new FileOutputStream(Constants.DOWNLOADS_FOLDER + fileName);
+				
+		int read = 0;
+		int offset = 0;
+				
+		while (offset < length) {
+			commStart = System.currentTimeMillis();
+			read = downloadStream.read(buffer, 0, 65536);
+			commEnd = ioStart = System.currentTimeMillis();
+			output.write(buffer, 0, read);
+			ioEnd = System.currentTimeMillis();
+			
+			io.add(new Time(ioStart, ioEnd));
+			comm.add(new Time(commStart, commEnd));
+
+			offset += read;
+		}
+		output.close();
+	}
 
 	/**
 	 * Usage: Client [-h hostIpAddress] file1 file2 file3...
@@ -124,10 +159,6 @@ public class Client {
 
 				offset += read;
 			}
-			
-            String flag = inFromServer.readLine();
-			if (Boolean.parseBoolean(flag))
-				infected.add(files.get(i));
 		}
 		
 		//Send urls
@@ -137,41 +168,29 @@ public class Client {
 			commStart = System.currentTimeMillis();
 			outToServer.writeBytes(Constants.URL + "\n");
 			outToServer.writeBytes(urls.get(i) + "\n");
-            String flag = inFromServer.readLine();
             commEnd = System.currentTimeMillis();
             comm.add(new Time(commStart, commEnd));
-			boolean infectedFlag = Boolean.parseBoolean(flag);
-			
-            System.out.println(Constants.getFileNameFromUrl(urls.get(i)) + "\tVirus? " + flag);
-            if (!infectedFlag) {
-	            DataInputStream downloadStream = new DataInputStream(clientSocket.getInputStream());
-	            
-	            commStart = System.currentTimeMillis();
-            	String fileName = inFromServer.readLine();
-            	long length = downloadStream.readLong();
-           		commEnd = System.currentTimeMillis();
-            		
-           		comm.add(new Time(commStart, commEnd));
-            	
-            	FileOutputStream output = new FileOutputStream(Constants.DOWNLOADS_FOLDER + fileName);
-				
-				read = 0;
-				offset = 0;
-				
-				while (offset < length) {
-					commStart = System.currentTimeMillis();
-					read = downloadStream.read(buffer, 0, 65536);
-					commEnd = ioStart = System.currentTimeMillis();
-					output.write(buffer, 0, read);
-					ioEnd = System.currentTimeMillis();
-					
-					io.add(new Time(ioStart, ioEnd));
-					comm.add(new Time(commStart, commEnd));
+		}
+		
+		//Get Results from Server
+		for (int i = 0; i < files.size(); i++) {
+			String flag = inFromServer.readLine();
+			if (Boolean.parseBoolean(flag))
+				infected.add(files.get(i));
+		}
+		
+		int urlsToDownload = 0;
+		for (int i = 0; i < urls.size(); i++) {
+			String flag = inFromServer.readLine();
+			if (!Boolean.parseBoolean(flag))
+				urlsToDownload++;
+		}
 
-					offset += read;
-				}
-				output.close();
-            }
+		//Download clean URLs		
+		DataInputStream downloadStream = new DataInputStream(clientSocket.getInputStream());
+		
+		for (int i = 0; i < urlsToDownload; i++) {
+			downloadUrlFromServer(downloadStream, inFromServer, buffer, io, comm);
 		}
 		
 		clientSocket.close();
