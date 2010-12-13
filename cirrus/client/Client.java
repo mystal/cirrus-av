@@ -1,6 +1,7 @@
 package cirrus.client;
 
 import cirrus.common.Constants;
+import cirrus.common.Time;
 
 import java.util.ArrayList;
 import java.io.*;
@@ -26,6 +27,17 @@ public class Client {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
+		Time total = new Time();
+		ArrayList<Time> io = new ArrayList<Time>();
+		ArrayList<Time> comm = new ArrayList<Time>();
+		
+		long ioStart;
+		long ioEnd;
+		long commStart;
+		long commEnd;
+
+		total.start = System.currentTimeMillis();
+
 		//Parse args
 		ArrayList<File> files = new ArrayList<File>(args.length);
 		ArrayList<File> infected = new ArrayList<File>();
@@ -90,17 +102,26 @@ public class Client {
 			
 			BufferedInputStream inFile = new BufferedInputStream(new FileInputStream(files.get(i)));
 			
+			commStart = System.currentTimeMillis();
 			outToServer.writeBytes(Constants.FILE + "\n");
 			outToServer.writeBytes(files.get(i).getName() + "\n");
 			outToServer.writeLong(length);
+			commEnd = System.currentTimeMillis();
+			comm.add(new Time(commStart, commEnd));
 			
 			offset = 0;
 			read = 0;
 			
 			while(offset < length) {
+				ioStart = System.currentTimeMillis();
 				read = inFile.read(buffer, 0, 65536);
+				ioEnd = commStart = System.currentTimeMillis();
 				outToServer.write(buffer, 0, read);
+				commEnd = System.currentTimeMillis();
 				
+				io.add(new Time(ioStart, ioEnd));
+				comm.add(new Time(commStart, commEnd));
+
 				offset += read;
 			}
 			
@@ -112,16 +133,25 @@ public class Client {
 		//Send urls
 		for (int i = 0; i < urls.size(); i++) {
 			System.out.println("Sending URL: " + urls.get(i));
+			
+			commStart = System.currentTimeMillis();
 			outToServer.writeBytes(Constants.URL + "\n");
 			outToServer.writeBytes(urls.get(i) + "\n");
             String flag = inFromServer.readLine();
+            commEnd = System.currentTimeMillis();
+            comm.add(new Time(commStart, commEnd));
 			boolean infectedFlag = Boolean.parseBoolean(flag);
 			
             System.out.println(Constants.getFileNameFromUrl(urls.get(i)) + "\tVirus? " + flag);
             if (!infectedFlag) {
 	            DataInputStream downloadStream = new DataInputStream(clientSocket.getInputStream());
+	            
+	            commStart = System.currentTimeMillis();
             	String fileName = inFromServer.readLine();
             	long length = downloadStream.readLong();
+           		commEnd = System.currentTimeMillis();
+            		
+           		comm.add(new Time(commStart, commEnd));
             	
             	FileOutputStream output = new FileOutputStream(Constants.DOWNLOADS_FOLDER + fileName);
 				
@@ -129,9 +159,15 @@ public class Client {
 				offset = 0;
 				
 				while (offset < length) {
+					commStart = System.currentTimeMillis();
 					read = downloadStream.read(buffer, 0, 65536);
+					commEnd = ioStart = System.currentTimeMillis();
 					output.write(buffer, 0, read);
+					ioEnd = System.currentTimeMillis();
 					
+					io.add(new Time(ioStart, ioEnd));
+					comm.add(new Time(commStart, commEnd));
+
 					offset += read;
 				}
 				output.close();
@@ -139,6 +175,8 @@ public class Client {
 		}
 		
 		clientSocket.close();
+		
+		total.end = System.currentTimeMillis();
 		
 		if (infected.isEmpty())
 			System.out.println("\n\nScan complete. No infections found.\n");
@@ -171,6 +209,23 @@ public class Client {
 				System.out.println("Error reading input. Leaving infected files.\n");
 			}
 		}
+		
+		long ioTotal = 0;
+		for (Time time : io) {
+			ioTotal += time.getTotal();
+		}
+		
+		long commTotal = 0;
+		for (Time time : comm) {
+			commTotal += time.getTotal();
+		}
+		
+		System.out.println("\nStatistics:");
+		System.out.println("Total time:\t" + (total.getTotal() / 1000.0) + " s");
+		System.out.println("Computation:\t" +  ((total.getTotal() - ioTotal - commTotal) / 1000.0) + " s");
+		System.out.println("IO:\t\t" + (ioTotal / 1000.0) + " s");
+		System.out.println("Communication:\t" + (commTotal / 1000.0) + " s");
+		
 	}
 
 }
