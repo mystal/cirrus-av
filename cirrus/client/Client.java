@@ -112,10 +112,6 @@ public class Client {
 			}
 		}
 		
-		if (files.size() + urls.size() <= 0) {
-			files.add(new File("../cirrus/client/Client.java"));
-		}
-		
 		if (host.equals(""))
 			host = "localhost";
 		

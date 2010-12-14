@@ -10,8 +10,15 @@ import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
+
+    private static final int CORE_POOL_SIZE = 10;
+    private static final int MAX_POOL_SIZE = 100;
+    private static final long KEEP_ALIVE_TIME = 100;
+
+    private static AtomicInteger threadCount;
 
 	public static String downloadFile(String fileName, DataInputStream inFromClient, 
 			ArrayList<Time> io, ArrayList<Time> comm) throws Exception {
@@ -155,6 +162,9 @@ public class Server {
 			DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
 			
 			int numFilesToReceive = inFromClient.readInt();
+            int numFiles = 0;
+            boolean[] fileInfected = new boolean[numFilesToReceive];
+            String[] filenames = new String[numFilesToReceive];
 			for (int i = 0; i < numFilesToReceive; i++) {
 				BufferedReader line = new BufferedReader(new InputStreamReader(inFromClient));
 				commStart = System.currentTimeMillis();
@@ -165,40 +175,48 @@ public class Server {
 				commEnd = System.currentTimeMillis();
 				comm.add(new Time(commStart, commEnd));
 
+                //TODO make scanning start a new thread from a thread pool...
+                //TODO scan returns or sets a boolean value in an array
 				//Get File / URL File
 				if (type.equalsIgnoreCase(Constants.FILE)) {
+                    numFiles++;
 					System.out.println("Receiving File: " + name);
-					name = downloadFile(name, inFromClient, io, comm);
+					filenames[i] = downloadFile(name, inFromClient, io, comm);
 					scanStart = System.currentTimeMillis();
-					boolean infected = av.scan(name);
+
+					fileInfected[i] = av.scan(name);
+
 					scanEnd = System.currentTimeMillis();
 					scan.add(new Time(scanStart, scanEnd));
-					commStart = System.currentTimeMillis();
-					outToClient.writeBytes(infected + "\n");
-					commEnd = System.currentTimeMillis();
-					comm.add(new Time(commStart, commEnd));
 				} else if (type.equalsIgnoreCase(Constants.URL)) {
 					System.out.println("Receiving URL to check: " + name);
-					name = downloadURL(name, io, comm);
+					filenames[i] = downloadURL(name, io, comm);
 					scanStart = System.currentTimeMillis();
 					
-					boolean infected = av.scan(name);
+					fileInfected[i] = av.scan(name);
 					
 					scanEnd = System.currentTimeMillis();
 					scan.add(new Time(scanStart, scanEnd));
-					commStart = System.currentTimeMillis();
-					outToClient.writeBytes(infected + "\n");
-					commEnd = System.currentTimeMillis();
-					comm.add(new Time(commStart, commEnd));
-					
-					//Send uninfected files to Client
-					if (!infected) {
-						uploadToClient(name, outToClient, io, comm);
-						System.out.println("Sending URL to client.");
-					}
 				}
 			}
-			
+            //Send list of (un)infected flags to client
+            for (int i = 0; i < numFilesToReceive; i++)
+            {
+                commStart = System.currentTimeMillis();
+                outToClient.writeBytes(fileInfected[i] + "\n");
+                commEnd = System.currentTimeMillis();
+                comm.add(new Time(commStart, commEnd));
+            }
+
+            //Send uninfected URL files to Client
+            for (int i = numFiles; i < numFilesToReceive; i++)
+            {
+                if (!fileInfected[i]) {
+                    uploadToClient(filenames[i], outToClient, io, comm);
+                    System.out.println("Sending URL to client.");
+                }
+            }
+
 			total.end = System.currentTimeMillis();
 			
 			long ioTotal = 0;
