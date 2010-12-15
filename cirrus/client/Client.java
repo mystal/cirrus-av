@@ -168,6 +168,8 @@ public class Client {
             comm.add(new Time(commStart, commEnd));
 		}
 		
+		System.out.println("\nWaiting for results from Server.");
+		
 		//Get Results from Server
 		for (int i = 0; i < files.size(); i++) {
 			String flag = inFromServer.readLine();

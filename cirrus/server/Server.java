@@ -5,12 +5,17 @@ import cirrus.server.AntiVirus;
 import cirrus.server.ClamAV;
 import cirrus.server.Flagger;
 import cirrus.common.Time;
+import cirrus.server.Scanner;
 
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
 
@@ -18,7 +23,20 @@ public class Server {
     private static final int MAX_POOL_SIZE = 100;
     private static final long KEEP_ALIVE_TIME = 100;
 
-    private static AtomicInteger threadCount;
+    private static AtomicInteger resultsReceived;
+    
+    private static boolean[] fileInfected;
+    private static AtomicLong scanTime;
+    private static ThreadPoolExecutor pool;
+    
+    public static void setResult(int index, boolean result) {
+    	fileInfected[index] = result;
+    	resultsReceived.incrementAndGet();
+    }
+
+    public static void addScanTime(long start, long end) {
+    	scanTime.addAndGet(end - start);
+    }
 
 	public static String downloadFile(String fileName, DataInputStream inFromClient, 
 			ArrayList<Time> io, ArrayList<Time> comm) throws Exception {
@@ -127,7 +145,8 @@ public class Server {
         Time total = new Time();
         ArrayList<Time> io = new ArrayList<Time>();
         ArrayList<Time> comm = new ArrayList<Time>();
-        ArrayList<Time> scan = new ArrayList<Time>();
+        scanTime = new AtomicLong(0);
+        pool = new ThreadPoolExecutor(10, 10, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
         
         long ioStart;
         long ioEnd;
@@ -137,6 +156,8 @@ public class Server {
         long scanEnd;
 
         boolean clamAV = false;
+        
+        resultsReceived = new AtomicInteger(0);
 
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equals("--av")) {
@@ -163,7 +184,7 @@ public class Server {
 			
 			int numFilesToReceive = inFromClient.readInt();
             int numFiles = 0;
-            boolean[] fileInfected = new boolean[numFilesToReceive];
+            fileInfected = new boolean[numFilesToReceive];
             String[] filenames = new String[numFilesToReceive];
 			for (int i = 0; i < numFilesToReceive; i++) {
 				BufferedReader line = new BufferedReader(new InputStreamReader(inFromClient));
@@ -182,23 +203,23 @@ public class Server {
                     numFiles++;
 					System.out.println("Receiving File: " + name);
 					filenames[i] = downloadFile(name, inFromClient, io, comm);
-					scanStart = System.currentTimeMillis();
-
-					fileInfected[i] = av.scan(name);
-
-					scanEnd = System.currentTimeMillis();
-					scan.add(new Time(scanStart, scanEnd));
+					
+					Scanner scanner = new Scanner(av, i, filenames[i]);
+                    pool.execute(scanner);
+					
 				} else if (type.equalsIgnoreCase(Constants.URL)) {
 					System.out.println("Receiving URL to check: " + name);
 					filenames[i] = downloadURL(name, io, comm);
-					scanStart = System.currentTimeMillis();
 					
-					fileInfected[i] = av.scan(name);
-					
-					scanEnd = System.currentTimeMillis();
-					scan.add(new Time(scanStart, scanEnd));
+					Scanner scanner = new Scanner(av, i, filenames[i]);
+                    pool.execute(scanner);
 				}
 			}
+			
+			while (resultsReceived.get() < fileInfected.length) {
+				//Wait for results
+			}
+			
             //Send list of (un)infected flags to client
             for (int i = 0; i < numFilesToReceive; i++)
             {
@@ -219,6 +240,8 @@ public class Server {
 
 			total.end = System.currentTimeMillis();
 			
+			pool.shutdown();
+			
 			long ioTotal = 0;
 			for (Time time : io) {
 				ioTotal += time.getTotal();
@@ -229,10 +252,7 @@ public class Server {
 				commTotal += time.getTotal();
 			}
 			
-			long scanTotal = 0;
-			for (Time time : scan) {
-				scanTotal += time.getTotal();
-			}
+			long scanTotal = scanTime.get();
 			
 			System.out.println("\nStatistics:");
 			System.out.println("Total time:\t" + (total.getTotal() / 1000.0) + " s");

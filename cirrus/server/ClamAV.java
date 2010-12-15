@@ -34,13 +34,15 @@ public class ClamAV implements AntiVirus
                 infected = true;
             while (line != null)
             {
-                System.err.println(line);
+                //System.err.println(line);
                 line = buff.readLine();
             }
         } catch (Exception e)
         {
             System.out.println("Error!");
+            e.printStackTrace();
         }
+        System.out.println(filename + " scanning complete: " + (infected ? "infected" : "clean"));
         return infected;
     }
 }
